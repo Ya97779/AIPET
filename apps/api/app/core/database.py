@@ -8,6 +8,7 @@ engine = create_async_engine(
     echo=False,
     pool_size=10,
     max_overflow=5,
+    pool_pre_ping=True,
 )
 
 AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
@@ -15,7 +16,4 @@ AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_co
 
 async def get_db():
     async with AsyncSessionLocal() as session:
-        try:
-            yield session
-        finally:
-            await session.close()
+        yield session
