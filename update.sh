@@ -10,9 +10,9 @@ cd "$SCRIPT_DIR"
 echo "🐾 PetAI Mind 更新脚本"
 echo "========================"
 
-# 1. 拉取最新代码（失败则跳过，支持手动更新代码）
+# 1. 拉取最新代码
 echo "📥 拉取最新代码..."
-git pull origin main || echo "⚠️  拉取失败，跳过（请手动更新代码）"
+git pull origin main
 
 # 2. 更新后端依赖
 echo "🐍 更新后端依赖..."
