@@ -3,13 +3,15 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { logout, getUser } from '@/lib/auth';
-import { Home, PawPrint, Stethoscope, ChefHat, LogOut } from 'lucide-react';
+import { Home, PawPrint, Stethoscope, ChefHat, Users, ShoppingBag, LogOut } from 'lucide-react';
 
 const navItems = [
   { href: '/', label: '首页', icon: Home },
   { href: '/pets', label: '宠物档案', icon: PawPrint },
   { href: '/consultation', label: 'AI问诊', icon: Stethoscope },
   { href: '/recipe', label: '智能食谱', icon: ChefHat },
+  { href: '/community', label: '社区互助', icon: Users },
+  { href: '/mall', label: '积分商城', icon: ShoppingBag },
 ];
 
 export function Sidebar() {
