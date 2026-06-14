@@ -39,10 +39,10 @@ export default function ConsultationPage() {
   }, []);
 
   const handleStartChat = async () => {
-    if (!selectedPet || starting) return;
+    if (starting) return;
     setStarting(true);
     try {
-      const res = await apiPost<{id: string}>('/consultation/chat/start', { pet_id: selectedPet });
+      const res = await apiPost<{id: string}>('/consultation/chat/start', { pet_id: selectedPet || null });
       window.location.href = `/consultation/chat/${res.id}`;
     } finally { setStarting(false); }
   };
@@ -55,16 +55,16 @@ export default function ConsultationPage() {
       </div>
 
       <div className="card mb-6">
-        <label className="block text-sm font-medium text-slate-700 mb-2">选择宠物</label>
+        <label className="block text-sm font-medium text-slate-700 mb-2">选择宠物（可选，有助于AI更精准分析）</label>
         <select value={selectedPet} onChange={e => setSelectedPet(e.target.value)} className="input max-w-xs">
-          <option value="">请选择宠物</option>
+          <option value="">不选择宠物</option>
           {pets.map(p => <option key={p.id} value={p.id}>{p.name} ({p.species === 'cat' ? '猫' : '狗'})</option>)}
         </select>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Link href={selectedPet ? `/consultation/image?petId=${selectedPet}` : '#'}
-          className={`card hover:shadow-lg transition-all group ${!selectedPet ? 'opacity-50 pointer-events-none' : ''}`}>
+        <Link href={`/consultation/image${selectedPet ? `?petId=${selectedPet}` : ''}`}
+          className="card hover:shadow-lg transition-all group">
           <div className="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
             <Camera size={28} className="text-red-500" />
           </div>
@@ -75,8 +75,8 @@ export default function ConsultationPage() {
           </span>
         </Link>
 
-        <button onClick={handleStartChat} disabled={!selectedPet || starting}
-          className={`card hover:shadow-lg transition-all group text-left ${!selectedPet ? 'opacity-50 pointer-events-none' : ''}`}>
+        <button onClick={handleStartChat} disabled={starting}
+          className="card hover:shadow-lg transition-all group text-left">
           <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
             <MessageSquare size={28} className="text-blue-500" />
           </div>
@@ -87,8 +87,8 @@ export default function ConsultationPage() {
           </span>
         </button>
 
-        <Link href={selectedPet ? `/consultation/lab-report?petId=${selectedPet}` : '#'}
-          className={`card hover:shadow-lg transition-all group ${!selectedPet ? 'opacity-50 pointer-events-none' : ''}`}>
+        <Link href={`/consultation/lab-report${selectedPet ? `?petId=${selectedPet}` : ''}`}
+          className="card hover:shadow-lg transition-all group">
           <div className="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
             <FileText size={28} className="text-green-500" />
           </div>

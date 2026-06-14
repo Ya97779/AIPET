@@ -10,7 +10,7 @@ class Consultation(Base):
     __tablename__ = "consultations"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    pet_id: Mapped[str] = mapped_column(String(36), ForeignKey("pets.id"), nullable=False)
+    pet_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("pets.id"), nullable=True)
     type: Mapped[str] = mapped_column(String(20), nullable=False)  # image/chat
     input_text: Mapped[str | None] = mapped_column(String)
     input_images: Mapped[list] = mapped_column(JSONB, default=list)

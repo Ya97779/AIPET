@@ -3,12 +3,12 @@ from pydantic import BaseModel
 
 
 class ImageConsultationRequest(BaseModel):
-    pet_id: str
+    pet_id: str | None = None
     text: str
 
 
 class ChatStartRequest(BaseModel):
-    pet_id: str
+    pet_id: str | None = None
 
 
 class ChatMessageRequest(BaseModel):

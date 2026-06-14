@@ -22,19 +22,18 @@ class ConsultationService:
 
     async def image_diagnosis_stream(
         self,
-        pet_id: str,
+        pet_id: str | None,
         user_id: str,
         text: str,
         image_urls: list[str],
     ) -> AsyncGenerator[str, None]:
         """Stream image diagnosis and save to DB."""
-        result = await self.db.execute(select(Pet).where(Pet.id == pet_id, Pet.user_id == user_id))
-        pet = result.scalar_one_or_none()
-        if pet is None:
-            yield '{"error": "Pet not found"}'
-            return
-
-        pet_context = self._build_pet_context(pet)
+        pet_context = "未提供宠物档案"
+        if pet_id:
+            result = await self.db.execute(select(Pet).where(Pet.id == pet_id, Pet.user_id == user_id))
+            pet = result.scalar_one_or_none()
+            if pet:
+                pet_context = self._build_pet_context(pet)
         full_response = ""
 
         async for chunk in diagnose_image_stream(image_urls, text, pet_context):

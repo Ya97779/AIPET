@@ -30,7 +30,7 @@ async def _images_to_base64(images: list[UploadFile]) -> list[str]:
 
 @router.post("/image")
 async def image_diagnosis(
-    pet_id: str = Form(...),
+    pet_id: str = Form(None),
     text: str = Form(...),
     images: list[UploadFile] = File(default=[]),
     current_user: User = Depends(get_current_user),
@@ -98,7 +98,7 @@ async def get_chat_history(
 
 @router.post("/lab-report")
 async def lab_report(
-    pet_id: str = Form(...),
+    pet_id: str = Form(None),
     image: UploadFile = File(...),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
