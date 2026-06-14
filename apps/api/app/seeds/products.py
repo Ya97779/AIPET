@@ -23,6 +23,10 @@ RECOMMEND_PRODUCTS = [
     {"name": "营养膏", "description": "浓缩营养补充，术后体弱适用", "price": "¥39", "category": "food", "tags": ["营养", "体弱", "术后恢复"]},
     {"name": "化毛膏", "description": "润滑肠道，帮助排出毛球", "price": "¥35", "category": "food", "tags": ["毛球", "呕吐毛球"]},
     {"name": "耳螨滴耳液", "description": "杀螨止痒，清洁耳道", "price": "¥42", "category": "medicine", "tags": ["耳朵", "耳螨", "甩头", "异味"]},
+    {"name": "宠物眼药水", "description": "消炎抗菌，缓解眼部不适", "price": "¥38", "category": "medicine", "tags": ["眼睛", "眼部", "流泪", "红肿"]},
+    {"name": "宠物口腔喷剂", "description": "清新口气，抑菌消炎", "price": "¥45", "category": "medicine", "tags": ["口腔", "口臭", "牙龈"]},
+    {"name": "宠物呼吸道保健液", "description": "缓解咳嗽打喷嚏，增强呼吸道免疫", "price": "¥55", "category": "medicine", "tags": ["呼吸道", "咳嗽", "打喷嚏"]},
+    {"name": "宠物维生素补充剂", "description": "综合维生素，增强免疫力", "price": "¥48", "category": "food", "tags": ["营养", "体弱", "免疫力"]},
 ]
 
 

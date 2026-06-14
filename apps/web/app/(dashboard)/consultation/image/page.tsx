@@ -35,10 +35,19 @@ function ImageDiagnosisContent() {
 
   const fetchRecommendations = async (diagnosisText: string) => {
     try {
-      const keywords = ['皮肤', '猫癣', '肠胃', '呕吐', '腹泻', '耳螨', '肥胖', '毛球', '寄生虫', '营养'];
-      const matched = keywords.filter(kw => diagnosisText.includes(kw));
-      if (matched.length > 0) {
-        const data = await apiGet<{ products: any[] }>(`/mall/recommend?tags=${matched.join(',')}`);
+      // Extract tags from AI response line: "6. 推荐商品标签：耳朵,耳螨,甩头"
+      const tagMatch = diagnosisText.match(/推荐商品标签[：:]\s*(.+)/);
+      let tags: string[] = [];
+      if (tagMatch) {
+        tags = tagMatch[1].split(/[,，、\s]+/).map(t => t.trim()).filter(Boolean);
+      }
+      // Fallback: extract from known keywords if AI didn't output tags
+      if (tags.length === 0) {
+        const allTags = ['皮肤', '猫癣', '真菌', '脱毛', '瘙痒', '红肿', '过敏', '术后', '防舔', '肠胃', '呕吐', '腹泻', '软便', '消化', '处方', '寄生虫', '跳蚤', '蜱虫', '肥胖', '超重', '减肥', '毛球', '营养', '体弱', '术后恢复', '耳朵', '耳螨', '甩头', '异味', '眼睛', '眼部', '流泪', '口腔', '口臭', '呼吸道'];
+        tags = allTags.filter(t => diagnosisText.includes(t));
+      }
+      if (tags.length > 0) {
+        const data = await apiGet<{ products: any[] }>(`/mall/recommend?tags=${tags.join(',')}`);
         setRecommendations(data.products);
       }
     } catch {}
