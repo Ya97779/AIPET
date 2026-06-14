@@ -20,6 +20,7 @@ function ImageDiagnosisContent() {
   const petId = searchParams.get('petId');
   const [text, setText] = useState('');
   const [images, setImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [response, setResponse] = useState('');
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
@@ -90,14 +91,18 @@ function ImageDiagnosisContent() {
               <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:border-primary-400 transition-colors">
                 <Camera size={32} className="mx-auto text-slate-400 mb-2" />
                 <input type="file" accept="image/*" multiple
-                  onChange={e => setImages(Array.from(e.target.files || []).slice(0, 3))}
+                  onChange={e => {
+                    const files = Array.from(e.target.files || []).slice(0, 3);
+                    setImages(files);
+                    setImagePreviews(files.map(f => URL.createObjectURL(f)));
+                  }}
                   className="w-full" />
                 <p className="text-xs text-slate-400 mt-2">支持 JPG/PNG/WebP，单张最大 5MB</p>
               </div>
-              {images.length > 0 && (
+              {imagePreviews.length > 0 && (
                 <div className="flex gap-2 mt-2">
-                  {images.map((img, i) => (
-                    <span key={i} className="text-xs bg-slate-100 px-2 py-1 rounded">{img.name}</span>
+                  {imagePreviews.map((src, i) => (
+                    <img key={i} src={src} alt={`预览 ${i + 1}`} className="w-20 h-20 object-cover rounded-lg border border-slate-200" />
                   ))}
                 </div>
               )}
@@ -164,6 +169,13 @@ function ImageDiagnosisContent() {
                   </div>
                 </div>
                 <p className="text-xs text-slate-500 mb-1">症状：{item.input_text}</p>
+                {item.input_images && item.input_images.length > 0 && (
+                  <div className="flex gap-2 mb-2">
+                    {item.input_images.map((img: string, i: number) => (
+                      <img key={i} src={img} alt={`诊断图片 ${i + 1}`} className="w-16 h-16 object-cover rounded-lg border border-slate-200" />
+                    ))}
+                  </div>
+                )}
                 <p className={`text-sm text-slate-700 whitespace-pre-wrap ${expandedId === item.id ? '' : 'line-clamp-3'}`}>{item.ai_response?.diagnosis || '无诊断结果'}</p>
               </div>
             ))}

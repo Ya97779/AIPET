@@ -173,6 +173,7 @@ async def consultation_history(
                 "pet_id": c.pet_id,
                 "type": c.type,
                 "input_text": c.input_text,
+                "input_images": c.input_images or [],
                 "ai_response": c.ai_response,
                 "created_at": c.created_at.isoformat() if c.created_at else None,
             }
