@@ -1,5 +1,6 @@
 import json
 import os
+import base64
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,6 +14,17 @@ from app.schemas.consultation import ChatStartRequest, ChatSessionResponse, Chat
 router = APIRouter(prefix="/api/consultation", tags=["consultation"])
 
 
+async def _images_to_base64(images: list[UploadFile]) -> list[str]:
+    """Convert uploaded images to base64 data URLs."""
+    result = []
+    for img in images:
+        content = await img.read()
+        b64 = base64.b64encode(content).decode("utf-8")
+        mime = img.content_type or "image/jpeg"
+        result.append(f"data:{mime};base64,{b64}")
+    return result
+
+
 @router.post("/image")
 async def image_diagnosis(
     pet_id: str = Form(...),
@@ -22,15 +34,7 @@ async def image_diagnosis(
     db: AsyncSession = Depends(get_db),
 ):
     """传图识病 - SSE streaming response."""
-    image_urls = []
-    for img in images:
-        upload_dir = os.getenv("UPLOAD_DIR", "./uploads")
-        os.makedirs(upload_dir, exist_ok=True)
-        file_path = os.path.join(upload_dir, f"{current_user.id}_{img.filename}")
-        with open(file_path, "wb") as f:
-            content = await img.read()
-            f.write(content)
-        image_urls.append(f"/uploads/{current_user.id}_{img.filename}")
+    image_urls = await _images_to_base64(images)
 
     service = ConsultationService(db)
 
@@ -64,15 +68,7 @@ async def chat_message(
     db: AsyncSession = Depends(get_db),
 ):
     """Send chat message - SSE streaming response."""
-    image_urls = []
-    for img in images:
-        upload_dir = os.getenv("UPLOAD_DIR", "./uploads")
-        os.makedirs(upload_dir, exist_ok=True)
-        file_path = os.path.join(upload_dir, f"{current_user.id}_{img.filename}")
-        with open(file_path, "wb") as f:
-            content = await img.read()
-            f.write(content)
-        image_urls.append(f"/uploads/{current_user.id}_{img.filename}")
+    image_urls = await _images_to_base64(images)
 
     service = ConsultationService(db)
 
