@@ -29,7 +29,7 @@ export async function apiGet<T>(path: string, force = false): Promise<T> {
 
 export function invalidateCache(pattern?: string) {
   if (!pattern) { cache.clear(); return; }
-  for (const key of cache.keys()) {
+  for (const key of Array.from(cache.keys())) {
     if (key.includes(pattern)) cache.delete(key);
   }
 }
