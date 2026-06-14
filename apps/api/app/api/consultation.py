@@ -195,31 +195,20 @@ async def list_chat_sessions(
         select(ChatSession)
         .where(ChatSession.user_id == current_user.id)
         .order_by(ChatSession.created_at.desc())
+        .limit(50)
     )
     sessions = list(result.scalars().all())
 
-    session_list = []
-    for s in sessions:
-        summary = s.summary
-        # Auto-fill summary from first user message if missing
-        if not summary:
-            msg_result = await db.execute(
-                select(ChatMessage.content)
-                .where(ChatMessage.session_id == s.id, ChatMessage.role == "user")
-                .order_by(ChatMessage.created_at.asc())
-                .limit(1)
-            )
-            first_msg = msg_result.scalar_one_or_none()
-            if first_msg:
-                summary = first_msg[:100]
-
-        session_list.append({
-            "id": s.id,
-            "pet_id": s.pet_id,
-            "status": s.status,
-            "summary": summary or "未命名对话",
-            "created_at": s.created_at.isoformat() if s.created_at else None,
-            "ended_at": s.ended_at.isoformat() if s.ended_at else None,
-        })
-
-    return {"sessions": session_list}
+    return {
+        "sessions": [
+            {
+                "id": s.id,
+                "pet_id": s.pet_id,
+                "status": s.status,
+                "summary": s.summary or "未命名对话",
+                "created_at": s.created_at.isoformat() if s.created_at else None,
+                "ended_at": s.ended_at.isoformat() if s.ended_at else None,
+            }
+            for s in sessions
+        ]
+    }
