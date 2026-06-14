@@ -8,7 +8,13 @@ from alembic import context
 
 from app.core.config import get_settings
 from app.models.base import Base
-from app.models import User, Pet, WeightRecord  # noqa: F401
+from app.models import (  # noqa: F401
+    User, Pet, WeightRecord,
+    Consultation, ChatSession, ChatMessage, Recipe,
+    Question, Answer, Like,
+    PointsTransaction, PointsProduct, PointsRedemption,
+    Product, ProductClick,
+)
 
 config = context.config
 config.set_main_option("sqlalchemy.url", get_settings().DATABASE_URL)

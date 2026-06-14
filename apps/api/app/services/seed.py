@@ -1,7 +1,8 @@
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.user import User
 from app.core.security import hash_password
+from app.seeds.products import seed_products
 
 
 SEED_USERS = [
@@ -22,3 +23,10 @@ async def seed_users(db: AsyncSession):
             )
             db.add(user)
     await db.commit()
+
+    # Ensure existing users have 100 points
+    await db.execute(update(User).where(User.points_balance == 0).values(points_balance=100))
+    await db.commit()
+
+    # Seed products
+    await seed_products(db)
