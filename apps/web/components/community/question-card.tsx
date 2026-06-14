@@ -13,12 +13,12 @@ const categoryColors: Record<string, string> = {
 };
 
 interface QuestionCardProps {
-  id: string; title: string; category: string; bountyPoints: number;
-  status: string; viewCount: number; answerCount: number;
-  author: { nickname: string | null }; createdAt: string;
+  id: string; title: string; category: string; bounty_points: number;
+  status: string; view_count: number; answer_count: number;
+  author: { nickname: string | null }; created_at: string;
 }
 
-export function QuestionCard({ id, title, category, bountyPoints, status, viewCount, answerCount, author, createdAt }: QuestionCardProps) {
+export function QuestionCard({ id, title, category, bounty_points, status, view_count, answer_count, author, created_at }: QuestionCardProps) {
   return (
     <Link href={`/community/${id}`} className="card hover:shadow-md transition-all block">
       <div className="flex items-start gap-3">
@@ -27,9 +27,9 @@ export function QuestionCard({ id, title, category, bountyPoints, status, viewCo
             <span className={`text-xs px-2 py-0.5 rounded-full ${categoryColors[category] || categoryColors.other}`}>
               {categoryLabels[category] || category}
             </span>
-            {bountyPoints > 0 && (
+            {bounty_points > 0 && (
               <span className="text-xs px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 flex items-center gap-1">
-                <Award size={12} /> 悬赏 {bountyPoints} 积分
+                <Award size={12} /> 悬赏 {bounty_points} 积分
               </span>
             )}
             {status === 'answered' && (
@@ -39,9 +39,9 @@ export function QuestionCard({ id, title, category, bountyPoints, status, viewCo
           <h3 className="font-medium text-slate-900 truncate">{title}</h3>
           <div className="flex items-center gap-4 mt-2 text-xs text-slate-400">
             <span>{author.nickname || '匿名用户'}</span>
-            <span className="flex items-center gap-1"><Eye size={12} /> {viewCount}</span>
-            <span className="flex items-center gap-1"><MessageCircle size={12} /> {answerCount}</span>
-            <span>{new Date(createdAt).toLocaleDateString('zh-CN')}</span>
+            <span className="flex items-center gap-1"><Eye size={12} /> {view_count}</span>
+            <span className="flex items-center gap-1"><MessageCircle size={12} /> {answer_count}</span>
+            <span>{new Date(created_at).toLocaleDateString('zh-CN')}</span>
           </div>
         </div>
       </div>
