@@ -12,11 +12,30 @@ export default function ConsultationPage() {
   const [selectedPet, setSelectedPet] = useState('');
   const [starting, setStarting] = useState(false);
 
-  const [sessions, setSessions] = useState<any[]>([]);
+  const [history, setHistory] = useState<any[]>([]);
 
   useEffect(() => {
     apiGet<Pet[]>('/pets').then(setPets);
-    apiGet<{ sessions: any[] }>('/consultation/chat/sessions').then(d => setSessions(d.sessions || [])).catch(() => {});
+    // Fetch all history: chat sessions + image/lab consultations
+    Promise.all([
+      apiGet<{ sessions: any[] }>('/consultation/chat/sessions').catch(() => ({ sessions: [] })),
+      apiGet<{ items: any[] }>('/consultation/history').catch(() => ({ items: [] })),
+    ]).then(([chatRes, consultRes]) => {
+      const chatItems = (chatRes.sessions || []).map((s: any) => ({
+        id: s.id, type: 'chat', title: s.summary || '未命名对话',
+        status: s.status, created_at: s.created_at,
+      }));
+      const consultItems = (consultRes.items || []).map((c: any) => ({
+        id: c.id, type: c.type,
+        title: c.type === 'image' ? (c.input_text || '传图识病') : (c.input_text || '化验单解读'),
+        status: 'ended', created_at: c.created_at,
+      }));
+      // Merge and sort by date
+      const all = [...chatItems, ...consultItems].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      setHistory(all);
+    });
   }, []);
 
   const handleStartChat = async () => {
@@ -81,25 +100,38 @@ export default function ConsultationPage() {
         </Link>
       </div>
 
-      {sessions.length > 0 && (
+      {history.length > 0 && (
         <div className="mt-8">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">历史对话</h2>
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">历史记录</h2>
           <div className="space-y-3">
-            {sessions.map((s: any) => (
-              <Link key={s.id} href={`/consultation/chat/${s.id}`} className="card hover:shadow-md transition-all block">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0 mr-3">
-                    <p className="text-sm font-medium text-slate-900 truncate">{s.summary || '未命名对话'}</p>
+            {history.map((item: any) => {
+              const href = item.type === 'chat' ? `/consultation/chat/${item.id}` :
+                           item.type === 'image' ? `/consultation/image` :
+                           `/consultation/lab-report`;
+              const typeLabel = item.type === 'chat' ? 'AI对话' :
+                                item.type === 'image' ? '传图识病' : '化验单';
+              const typeColor = item.type === 'chat' ? 'bg-blue-50 text-blue-700' :
+                                item.type === 'image' ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700';
+
+              return (
+                <Link key={`${item.type}-${item.id}`} href={href} className="card hover:shadow-md transition-all block">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0 mr-3 flex items-center gap-2">
+                      <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${typeColor}`}>{typeLabel}</span>
+                      <p className="text-sm font-medium text-slate-900 truncate">{item.title}</p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {item.type === 'chat' && (
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${item.status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                          {item.status === 'active' ? '进行中' : '已结束'}
+                        </span>
+                      )}
+                      <span className="text-xs text-slate-400">{new Date(item.created_at).toLocaleString('zh-CN')}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${s.status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
-                      {s.status === 'active' ? '进行中' : '已结束'}
-                    </span>
-                    <span className="text-xs text-slate-400">{new Date(s.created_at).toLocaleString('zh-CN')}</span>
-                  </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         </div>
       )}
