@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "dev-secret-key-change-in-production"
     UPLOAD_DIR: str = "./uploads"
     MAX_UPLOAD_SIZE: int = 5242880
+    ZHIPU_API_KEY: str = ""
+    ZHIPU_VISION_MODEL: str = "glm-4.6v"
+    ZHIPU_TEXT_MODEL: str = "glm-4.7"
 
     @property
     def DATABASE_URL(self) -> str:
