@@ -1,11 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { streamSSE } from '@/lib/sse';
 import { Camera, Send, AlertCircle, CheckCircle } from 'lucide-react';
 
 export default function ImageDiagnosisPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="text-slate-400">加载中...</div></div>}>
+      <ImageDiagnosisContent />
+    </Suspense>
+  );
+}
+
+function ImageDiagnosisContent() {
   const searchParams = useSearchParams();
   const petId = searchParams.get('petId');
   const [text, setText] = useState('');
