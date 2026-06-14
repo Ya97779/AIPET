@@ -25,7 +25,12 @@ function LabReportContent() {
   const [rawOutput, setRawOutput] = useState('');
   const [result, setResult] = useState<LabResult | null>(null);
 
-  useEffect(() => { apiGet<Pet[]>('/pets').then(setPets); }, []);
+  const [history, setHistory] = useState<any[]>([]);
+
+  useEffect(() => {
+    apiGet<Pet[]>('/pets').then(setPets);
+    apiGet<{ items: any[] }>('/consultation/history?type=lab_report').then(d => setHistory(d.items || [])).catch(() => {});
+  }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -229,6 +234,22 @@ function LabReportContent() {
           )}
         </div>
       </div>
+
+      {history.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">历史化验单</h2>
+          <div className="space-y-3">
+            {history.map((item: any) => (
+              <div key={item.id} className="card">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-700">{item.input_text || '化验单解读'}</span>
+                  <span className="text-xs text-slate-400">{new Date(item.created_at).toLocaleString('zh-CN')}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

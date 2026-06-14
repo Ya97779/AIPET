@@ -13,8 +13,19 @@ export default function RecipePage() {
   const [recipe, setRecipe] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [history, setHistory] = useState<any[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   useEffect(() => { apiGet<Pet[]>('/pets').then(setPets); }, []);
+
+  useEffect(() => {
+    if (!selectedPet) { setHistory([]); return; }
+    setHistoryLoading(true);
+    apiGet<any[]>(`/recipe/history?pet_id=${selectedPet}`)
+      .then(d => setHistory(d || []))
+      .catch(() => {})
+      .finally(() => setHistoryLoading(false));
+  }, [selectedPet]);
 
   const handleGenerate = async () => {
     if (!selectedPet || loading) return;
@@ -74,6 +85,30 @@ export default function RecipePage() {
           <ChefHat size={64} className="mx-auto text-slate-200 mb-4" />
           <p className="text-lg text-slate-500 mb-2">选择宠物并点击"生成食谱"</p>
           <p className="text-sm text-slate-400">AI将根据宠物的体重、品种和健康状况生成专属食谱</p>
+        </div>
+      )}
+
+      {!historyLoading && history.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">历史食谱</h2>
+          <div className="space-y-3">
+            {history.map((r: any) => (
+              <div key={r.id} className="card">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-slate-500">{new Date(r.created_at).toLocaleString('zh-CN')}</span>
+                  <span className="text-sm font-medium text-primary-600">{r.daily_calories} kcal/天</span>
+                </div>
+                <div className="text-sm text-slate-700">
+                  {r.food_items?.main_food && (
+                    <span className="inline-block mr-3">{r.food_items.main_food.name} {r.food_items.main_food.amount_g}g</span>
+                  )}
+                  {Array.isArray(r.food_items?.supplements) && r.food_items.supplements.map((f: any, i: number) => (
+                    <span key={i} className="inline-block mr-3">{f.name} {f.amount_g}g</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

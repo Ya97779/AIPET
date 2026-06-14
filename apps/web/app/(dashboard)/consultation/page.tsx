@@ -12,7 +12,12 @@ export default function ConsultationPage() {
   const [selectedPet, setSelectedPet] = useState('');
   const [starting, setStarting] = useState(false);
 
-  useEffect(() => { apiGet<Pet[]>('/pets').then(setPets); }, []);
+  const [sessions, setSessions] = useState<any[]>([]);
+
+  useEffect(() => {
+    apiGet<Pet[]>('/pets').then(setPets);
+    apiGet<{ sessions: any[] }>('/consultation/chat/sessions').then(d => setSessions(d.sessions || [])).catch(() => {});
+  }, []);
 
   const handleStartChat = async () => {
     if (!selectedPet || starting) return;
@@ -75,6 +80,27 @@ export default function ConsultationPage() {
           </span>
         </Link>
       </div>
+
+      {sessions.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">历史对话</h2>
+          <div className="space-y-3">
+            {sessions.map((s: any) => (
+              <Link key={s.id} href={`/consultation/chat/${s.id}`} className="card hover:shadow-md transition-all block">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${s.status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                      {s.status === 'active' ? '进行中' : '已结束'}
+                    </span>
+                    {s.summary && <p className="text-sm text-slate-700 mt-1 truncate max-w-md">{s.summary}</p>}
+                  </div>
+                  <span className="text-xs text-slate-400">{new Date(s.created_at).toLocaleString('zh-CN')}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

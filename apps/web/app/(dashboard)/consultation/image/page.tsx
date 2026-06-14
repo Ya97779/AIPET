@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense, useRef } from 'react';
+import { useState, useEffect, Suspense, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { streamSSE } from '@/lib/sse';
 import { apiGet } from '@/lib/api';
@@ -25,6 +25,11 @@ function ImageDiagnosisContent() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const responseRef = useRef('');
+  const [history, setHistory] = useState<any[]>([]);
+
+  useEffect(() => {
+    apiGet<{ items: any[] }>('/consultation/history?type=image').then(d => setHistory(d.items || [])).catch(() => {});
+  }, []);
 
   const fetchRecommendations = async (diagnosisText: string) => {
     try {
@@ -143,6 +148,23 @@ function ImageDiagnosisContent() {
           )}
         </div>
       </div>
+
+      {history.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">历史诊断</h2>
+          <div className="space-y-3">
+            {history.map((item: any) => (
+              <div key={item.id} className="card">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-slate-500">{new Date(item.created_at).toLocaleString('zh-CN')}</span>
+                  <span className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full">传图识病</span>
+                </div>
+                <p className="text-sm text-slate-700 truncate">{item.input_text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
