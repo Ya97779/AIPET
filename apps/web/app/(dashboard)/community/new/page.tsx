@@ -16,6 +16,7 @@ export default function NewQuestionPage() {
   const router = useRouter();
   const user = getUser();
   const [pets, setPets] = useState<Pet[]>([]);
+  const [balance, setBalance] = useState(user?.points_balance || 0);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [category, setCategory] = useState('disease');
@@ -25,13 +26,16 @@ export default function NewQuestionPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => { apiGet<Pet[]>('/pets').then(setPets); }, []);
+  useEffect(() => {
+    apiGet<Pet[]>('/pets').then(setPets);
+    apiGet<{ balance: number }>('/mall/points/history').then(d => setBalance(d.balance));
+  }, []);
 
   const handleSubmit = async () => {
     if (!title.trim() || title.length < 5) { setError('标题至少5个字'); return; }
     if (!content.trim() || content.length < 10) { setError('内容至少10个字'); return; }
     if (useBounty && bountyPoints <= 0) { setError('悬赏积分必须大于0'); return; }
-    if (useBounty && bountyPoints > (user?.points_balance || 0)) { setError('积分不足'); return; }
+    if (useBounty && bountyPoints > balance) { setError('积分不足'); return; }
 
     setSubmitting(true); setError('');
     try {
@@ -78,9 +82,9 @@ export default function NewQuestionPage() {
           </label>
           {useBounty && (
             <div className="mt-3">
-              <p className="text-xs text-slate-500 mb-2">当前余额：{user?.points_balance || 0} 积分</p>
+              <p className="text-xs text-slate-500 mb-2">当前余额：{balance} 积分</p>
               <input type="number" value={bountyPoints || ''} onChange={e => setBountyPoints(Number(e.target.value))}
-                className="input max-w-[200px]" min={1} max={user?.points_balance || 0} placeholder="悬赏积分" />
+                className="input max-w-[200px]" min={1} max={balance} placeholder="悬赏积分" />
               <p className="text-xs text-slate-400 mt-1">回答被采纳后，悬赏积分将转给回答者</p>
             </div>
           )}
