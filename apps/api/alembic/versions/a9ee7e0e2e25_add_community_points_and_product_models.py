@@ -1,7 +1,7 @@
 """add community points and product models
 
 Revision ID: a9ee7e0e2e25
-Revises:
+Revises: a1225146de9f
 Create Date: 2026-06-14 14:08:29.005982
 
 """
@@ -14,7 +14,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision: str = 'a9ee7e0e2e25'
-down_revision: Union[str, None] = None
+down_revision: Union[str, None] = 'a1225146de9f'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
