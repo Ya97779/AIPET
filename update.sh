@@ -27,9 +27,8 @@ alembic upgrade head 2>/dev/null || echo "无新迁移"
 # 4. 重启后端
 echo "🚀 重启后端..."
 pkill -9 -f "uvicorn app.main" 2>/dev/null || true
-pkill -9 -f "gunicorn" 2>/dev/null || true
 sleep 2
-nohup .venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1 > ../../logs/api.log 2>&1 &
+nohup .venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8001 --workers 1 > ../../logs/api.log 2>&1 &
 echo "✅ 后端已重启 (PID: $!)"
 
 cd "$SCRIPT_DIR"
