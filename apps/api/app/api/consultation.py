@@ -91,3 +91,26 @@ async def get_chat_history(
     service = ConsultationService(db)
     messages = await service.get_chat_history(session_id, current_user.id)
     return messages
+
+
+@router.post("/lab-report")
+async def lab_report(
+    pet_id: str = Form(...),
+    image: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """化验单解读 - SSE streaming response."""
+    image_urls = await _images_to_base64([image])
+
+    from app.agents.lab_report import LabReportAgent
+    agent = LabReportAgent(db)
+
+    async def event_generator():
+        yield f"data: {json.dumps({'type': 'status', 'content': '正在读取宠物档案...'})}\n\n"
+        yield f"data: {json.dumps({'type': 'status', 'content': '正在识别化验单...'})}\n\n"
+        async for chunk in agent.analyze_stream(pet_id, image_urls[0]):
+            yield f"data: {json.dumps({'type': 'text', 'content': chunk})}\n\n"
+        yield f"data: {json.dumps({'type': 'done'})}\n\n"
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")

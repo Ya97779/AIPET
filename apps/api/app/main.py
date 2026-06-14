@@ -5,6 +5,8 @@ from app.api.auth import router as auth_router
 from app.api.pets import router as pets_router
 from app.api.consultation import router as consultation_router
 from app.api.recipe import router as recipe_router
+from app.api.community import router as community_router
+from app.api.mall import router as mall_router
 from app.core.database import AsyncSessionLocal
 from app.services.seed import seed_users
 
@@ -36,6 +38,8 @@ app.include_router(auth_router)
 app.include_router(pets_router)
 app.include_router(consultation_router)
 app.include_router(recipe_router)
+app.include_router(community_router)
+app.include_router(mall_router)
 
 
 @app.get("/api/health")
