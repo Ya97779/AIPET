@@ -159,7 +159,8 @@ function ImageDiagnosisContent() {
                   <span className="text-sm text-slate-500">{new Date(item.created_at).toLocaleString('zh-CN')}</span>
                   <span className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full">传图识病</span>
                 </div>
-                <p className="text-sm text-slate-700 truncate">{item.input_text}</p>
+                <p className="text-xs text-slate-500 mb-1">症状：{item.input_text}</p>
+                <p className="text-sm text-slate-700 whitespace-pre-wrap line-clamp-3">{item.ai_response?.diagnosis || '无诊断结果'}</p>
               </div>
             ))}
           </div>

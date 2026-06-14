@@ -89,6 +89,11 @@ class ConsultationService:
             image_urls=image_urls or [],
         )
         self.db.add(user_msg)
+
+        # Save first user message as session summary
+        if not session.summary:
+            session.summary = text[:100]
+
         await self.db.commit()
 
         history_result = await self.db.execute(

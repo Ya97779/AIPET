@@ -88,13 +88,15 @@ export default function ConsultationPage() {
             {sessions.map((s: any) => (
               <Link key={s.id} href={`/consultation/chat/${s.id}`} className="card hover:shadow-md transition-all block">
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className="flex-1 min-w-0 mr-3">
+                    <p className="text-sm font-medium text-slate-900 truncate">{s.summary || '未命名对话'}</p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
                     <span className={`text-xs px-2 py-0.5 rounded-full ${s.status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
                       {s.status === 'active' ? '进行中' : '已结束'}
                     </span>
-                    {s.summary && <p className="text-sm text-slate-700 mt-1 truncate max-w-md">{s.summary}</p>}
+                    <span className="text-xs text-slate-400">{new Date(s.created_at).toLocaleString('zh-CN')}</span>
                   </div>
-                  <span className="text-xs text-slate-400">{new Date(s.created_at).toLocaleString('zh-CN')}</span>
                 </div>
               </Link>
             ))}
