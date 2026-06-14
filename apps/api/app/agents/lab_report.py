@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.models.pet import Pet
-from app.core.zhipu_client import ZhipuClient
+from app.core.zhipu_client import vision_completion_stream
 
 
 LAB_REPORT_PROMPT = """你是一位专业的宠物化验单解读助手。请分析这张化验单图片，提取所有检测指标并解读。
@@ -36,7 +36,6 @@ LAB_REPORT_PROMPT = """你是一位专业的宠物化验单解读助手。请分
 class LabReportAgent:
     def __init__(self, db: AsyncSession):
         self.db = db
-        self.client = ZhipuClient()
 
     async def _get_pet_context(self, pet_id: str) -> str:
         result = await self.db.execute(select(Pet).where(Pet.id == pet_id))
@@ -51,13 +50,12 @@ class LabReportAgent:
         pet_context = await self._get_pet_context(pet_id)
         prompt = LAB_REPORT_PROMPT.format(pet_context=pet_context)
 
-        async for chunk in self.client.chat_stream(
-            messages=[
-                {"role": "user", "content": [
-                    {"type": "text", "text": prompt},
-                    {"type": "image_url", "image_url": {"url": image_base64}},
-                ]}
-            ],
-            model="glm-4.6v",
-        ):
+        messages = [
+            {"role": "user", "content": [
+                {"type": "text", "text": prompt},
+                {"type": "image_url", "image_url": {"url": image_base64}},
+            ]}
+        ]
+
+        async for chunk in vision_completion_stream(messages, model="glm-4.6v"):
             yield chunk
