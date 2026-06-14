@@ -59,7 +59,7 @@ export default function PetDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 card">
           <h2 className="text-lg font-semibold mb-4">基本信息</h2>
-          <PetForm initialData={pet} onSubmit={handleUpdate} submitLabel="更新档案" />
+          <PetForm initialData={{ ...pet, birthday: pet.birthday ?? undefined, weight_kg: pet.weight_kg?.toString() }} onSubmit={handleUpdate} submitLabel="更新档案" />
         </div>
 
         <div className="card">
