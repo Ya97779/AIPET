@@ -26,6 +26,7 @@ function ImageDiagnosisContent() {
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const responseRef = useRef('');
   const [history, setHistory] = useState<any[]>([]);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     apiGet<{ items: any[] }>('/consultation/history?type=image').then(d => setHistory(d.items || [])).catch(() => {});
@@ -154,13 +155,16 @@ function ImageDiagnosisContent() {
           <h2 className="text-lg font-semibold text-slate-900 mb-4">历史诊断</h2>
           <div className="space-y-3">
             {history.map((item: any) => (
-              <div key={item.id} className="card">
+              <div key={item.id} className="card cursor-pointer hover:shadow-md transition-all" onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-slate-500">{new Date(item.created_at).toLocaleString('zh-CN')}</span>
-                  <span className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full">传图识病</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full">传图识病</span>
+                    <span className="text-xs text-slate-400">{expandedId === item.id ? '收起' : '展开'}</span>
+                  </div>
                 </div>
                 <p className="text-xs text-slate-500 mb-1">症状：{item.input_text}</p>
-                <p className="text-sm text-slate-700 whitespace-pre-wrap line-clamp-3">{item.ai_response?.diagnosis || '无诊断结果'}</p>
+                <p className={`text-sm text-slate-700 whitespace-pre-wrap ${expandedId === item.id ? '' : 'line-clamp-3'}`}>{item.ai_response?.diagnosis || '无诊断结果'}</p>
               </div>
             ))}
           </div>

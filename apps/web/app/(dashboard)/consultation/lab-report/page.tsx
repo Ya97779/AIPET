@@ -26,6 +26,7 @@ function LabReportContent() {
   const [result, setResult] = useState<LabResult | null>(null);
 
   const [history, setHistory] = useState<any[]>([]);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     apiGet<Pet[]>('/pets').then(setPets);
@@ -240,11 +241,19 @@ function LabReportContent() {
           <h2 className="text-lg font-semibold text-slate-900 mb-4">历史化验单</h2>
           <div className="space-y-3">
             {history.map((item: any) => (
-              <div key={item.id} className="card">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-700">{item.input_text || '化验单解读'}</span>
-                  <span className="text-xs text-slate-400">{new Date(item.created_at).toLocaleString('zh-CN')}</span>
+              <div key={item.id} className="card cursor-pointer hover:shadow-md transition-all" onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-slate-900">{item.input_text || '化验单解读'}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-400">{new Date(item.created_at).toLocaleString('zh-CN')}</span>
+                    <span className="text-xs text-slate-400">{expandedId === item.id ? '收起' : '展开'}</span>
+                  </div>
                 </div>
+                {expandedId === item.id && (
+                  <div className="mt-2 pt-2 border-t border-slate-100">
+                    <p className="text-sm text-slate-700 whitespace-pre-wrap">{item.ai_response?.raw || '无解读结果'}</p>
+                  </div>
+                )}
               </div>
             ))}
           </div>
