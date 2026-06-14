@@ -98,9 +98,10 @@ class ConsultationService:
         history_result = await self.db.execute(
             select(ChatMessage)
             .where(ChatMessage.session_id == session_id)
-            .order_by(ChatMessage.created_at.asc())
+            .order_by(ChatMessage.created_at.desc())
+            .limit(10)
         )
-        history = history_result.scalars().all()
+        history = list(reversed(list(history_result.scalars().all())))
 
         messages = [{"role": msg.role, "content": msg.content} for msg in history]
 
