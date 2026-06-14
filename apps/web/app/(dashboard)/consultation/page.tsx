@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { apiGet, apiPost } from '@/lib/api';
-import { Camera, MessageSquare, ArrowRight, PawPrint } from 'lucide-react';
+import { Camera, MessageSquare, ArrowRight, PawPrint, FileText } from 'lucide-react';
 import Link from 'next/link';
 
 interface Pet { id: string; name: string; species: string; }
@@ -38,7 +38,7 @@ export default function ConsultationPage() {
         </select>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Link href={selectedPet ? `/consultation/image?petId=${selectedPet}` : '#'}
           className={`card hover:shadow-lg transition-all group ${!selectedPet ? 'opacity-50 pointer-events-none' : ''}`}>
           <div className="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
@@ -62,6 +62,18 @@ export default function ConsultationPage() {
             {starting ? '创建中...' : '开始问诊'} <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
           </span>
         </button>
+
+        <Link href={selectedPet ? `/consultation/lab-report?petId=${selectedPet}` : '#'}
+          className={`card hover:shadow-lg transition-all group ${!selectedPet ? 'opacity-50 pointer-events-none' : ''}`}>
+          <div className="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+            <FileText size={28} className="text-green-500" />
+          </div>
+          <h2 className="text-xl font-semibold text-slate-900 mb-2">化验单解读</h2>
+          <p className="text-slate-500 mb-5">上传化验单图片，AI为您结构化解读各项指标</p>
+          <span className="text-primary-600 flex items-center gap-1.5 font-medium">
+            开始解读 <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+          </span>
+        </Link>
       </div>
     </div>
   );

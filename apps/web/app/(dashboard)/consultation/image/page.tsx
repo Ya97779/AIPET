@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, Suspense, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { streamSSE } from '@/lib/sse';
+import { apiGet } from '@/lib/api';
 import { Camera, Send, AlertCircle, CheckCircle } from 'lucide-react';
+import { RecommendCard } from '@/components/mall/recommend-card';
 
 export default function ImageDiagnosisPage() {
   return (
@@ -21,6 +23,19 @@ function ImageDiagnosisContent() {
   const [response, setResponse] = useState('');
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+  const [recommendations, setRecommendations] = useState<any[]>([]);
+  const responseRef = useRef('');
+
+  const fetchRecommendations = async (diagnosisText: string) => {
+    try {
+      const keywords = ['皮肤', '猫癣', '肠胃', '呕吐', '腹泻', '耳螨', '肥胖', '毛球', '寄生虫', '营养'];
+      const matched = keywords.filter(kw => diagnosisText.includes(kw));
+      if (matched.length > 0) {
+        const data = await apiGet<{ products: any[] }>(`/mall/recommend?tags=${matched.join(',')}`);
+        setRecommendations(data.products);
+      }
+    } catch {}
+  };
 
   const handleSubmit = () => {
     if (!text || !petId || loading) return;
@@ -32,13 +47,21 @@ function ImageDiagnosisContent() {
 
     setLoading(true);
     setResponse('');
+    responseRef.current = '';
     setStatus('loading');
 
     streamSSE(
       '/api/consultation/image',
       formData,
-      (chunk) => setResponse(prev => prev + chunk),
-      () => { setLoading(false); setStatus('done'); },
+      (chunk) => {
+        responseRef.current += chunk;
+        setResponse(prev => prev + chunk);
+      },
+      () => {
+        setLoading(false);
+        setStatus('done');
+        fetchRecommendations(responseRef.current);
+      },
       (err) => { setResponse(`诊断失败: ${err}`); setLoading(false); setStatus('error'); },
     );
   };
@@ -102,6 +125,20 @@ function ImageDiagnosisContent() {
           {status === 'error' && (
             <div className="mt-4 flex items-center gap-2 text-red-600 text-sm">
               <AlertCircle size={16} /> 诊断失败，请重试
+            </div>
+          )}
+          {recommendations.length > 0 && (
+            <div className="mt-6">
+              <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                🛒 为您推荐（基于诊断结果）
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {recommendations.map(p => (
+                  <RecommendCard key={p.id} name={p.name} description={p.description}
+                    imageUrl={p.image_url} price={p.price} category={p.category} tags={p.tags} />
+                ))}
+              </div>
+              <p className="text-xs text-slate-400 mt-2">以上商品由AI根据诊断结果推荐，仅供参考</p>
             </div>
           )}
         </div>
