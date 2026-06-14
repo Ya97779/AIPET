@@ -1,5 +1,9 @@
 const API_BASE = '/api';
 
+// Simple in-memory cache for GET requests
+const cache = new Map<string, { data: unknown; expires: number }>();
+const CACHE_TTL = 30_000; // 30 seconds
+
 async function getHeaders(): Promise<HeadersInit> {
   const headers: HeadersInit = { 'Content-Type': 'application/json' };
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
@@ -7,10 +11,27 @@ async function getHeaders(): Promise<HeadersInit> {
   return headers;
 }
 
-export async function apiGet<T>(path: string): Promise<T> {
+export async function apiGet<T>(path: string, force = false): Promise<T> {
+  const key = path;
+  const now = Date.now();
+
+  if (!force) {
+    const cached = cache.get(key);
+    if (cached && cached.expires > now) return cached.data as T;
+  }
+
   const res = await fetch(`${API_BASE}${path}`, { headers: await getHeaders() });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
-  return res.json();
+  const data = await res.json();
+  cache.set(key, { data, expires: now + CACHE_TTL });
+  return data;
+}
+
+export function invalidateCache(pattern?: string) {
+  if (!pattern) { cache.clear(); return; }
+  for (const key of cache.keys()) {
+    if (key.includes(pattern)) cache.delete(key);
+  }
 }
 
 export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
@@ -20,6 +41,11 @@ export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
     body: body ? JSON.stringify(body) : undefined,
   });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
+  // Invalidate related cache on POST
+  invalidateCache('/consultation');
+  invalidateCache('/recipe');
+  invalidateCache('/mall');
+  invalidateCache('/community');
   return res.json();
 }
 
