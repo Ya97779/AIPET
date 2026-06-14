@@ -16,6 +16,7 @@ export default function ChatPage() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
+  const streamingRef = useRef('');
   const bottomRef = useRef<HTMLDivElement>(null);
   const cancelRef = useRef<(() => void) | null>(null);
 
@@ -40,19 +41,27 @@ export default function ChatPage() {
     const formData = new FormData();
     formData.append('text', userContent);
 
+    streamingRef.current = '';
+
     cancelRef.current = streamSSE(
       `/api/consultation/chat/${sessionId}`,
       formData,
-      (chunk) => setStreamingContent(prev => prev + chunk),
+      (chunk) => {
+        streamingRef.current += chunk;
+        setStreamingContent(streamingRef.current);
+      },
       () => {
-        if (streamingContent) {
-          setMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', content: streamingContent, created_at: new Date().toISOString() }]);
+        const finalContent = streamingRef.current;
+        if (finalContent) {
+          setMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', content: finalContent, created_at: new Date().toISOString() }]);
         }
+        streamingRef.current = '';
         setStreamingContent('');
         setLoading(false);
       },
       (err) => {
         setMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', content: `错误: ${err}`, created_at: new Date().toISOString() }]);
+        streamingRef.current = '';
         setStreamingContent('');
         setLoading(false);
       },
