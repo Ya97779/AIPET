@@ -26,7 +26,7 @@ alembic upgrade head 2>/dev/null || echo "无新迁移"
 
 # 4. 重启后端
 echo "🚀 重启后端..."
-pkill -f "uvicorn app.main" 2>/dev/null || true
+fuser -k 8000/tcp 2>/dev/null || true
 sleep 2
 nohup .venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1 > ../../logs/api.log 2>&1 &
 echo "✅ 后端已重启 (PID: $!)"
@@ -41,7 +41,7 @@ npm run build
 
 # 6. 重启前端
 echo "🌐 重启前端..."
-pkill -f "next start" 2>/dev/null || true
+fuser -k 3000/tcp 2>/dev/null || true
 sleep 2
 nohup npm start > ../../logs/web.log 2>&1 &
 echo "✅ 前端已重启 (PID: $!)"
