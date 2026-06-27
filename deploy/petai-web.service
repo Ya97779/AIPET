@@ -1,0 +1,15 @@
+[Unit]
+Description=PetAI Mind Web (Next.js)
+After=network.target petai-api.service
+
+[Service]
+User=root
+WorkingDirectory=/var/www/AIPET/apps/web
+ExecStart=/usr/bin/npm start
+Restart=always
+RestartSec=3
+Environment=NODE_ENV=production
+Environment=PORT=3000
+
+[Install]
+WantedBy=multi-user.target
