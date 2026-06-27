@@ -24,35 +24,34 @@ pip install -r requirements.txt -q
 echo "🗃️  检查数据库迁移..."
 alembic upgrade head 2>/dev/null || echo "无新迁移"
 
-# 4. 重启后端
-echo "🚀 重启后端..."
-pkill -9 -f "uvicorn app.main" 2>/dev/null || true
-sleep 2
-nohup .venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8001 --workers 1 > ../../logs/api.log 2>&1 &
-echo "✅ 后端已重启 (PID: $!)"
-
 cd "$SCRIPT_DIR"
 
-# 5. 更新前端
+# 4. 更新前端
 echo "📦 更新前端..."
 cd apps/web
 npm install -q
 npm run build
 
-# 6. 重启前端
-echo "🌐 重启前端..."
-pkill -9 -f "next start" 2>/dev/null || true
-pkill -9 -f "next-server" 2>/dev/null || true
-sleep 2
-nohup npm start > ../../logs/web.log 2>&1 &
-echo "✅ 前端已重启 (PID: $!)"
-
 cd "$SCRIPT_DIR"
+
+# 5. 重启服务（systemd 管理）
+echo "🚀 重启后端..."
+systemctl restart petai-api
+
+echo "🌐 重启前端..."
+systemctl restart petai-web
+
+# 6. 检查状态
+sleep 2
+echo ""
+echo "服务状态："
+systemctl is-active petai-api && echo "  ✅ 后端运行中" || echo "  ❌ 后端启动失败"
+systemctl is-active petai-web && echo "  ✅ 前端运行中" || echo "  ❌ 前端启动失败"
 
 echo ""
 echo "========================"
-echo -e "🎉 更新完成！"
+echo "🎉 更新完成！"
 echo ""
 echo "查看日志："
-echo "  tail -f logs/api.log"
-echo "  tail -f logs/web.log"
+echo "  journalctl -u petai-api -f    # 后端日志"
+echo "  journalctl -u petai-web -f    # 前端日志"
